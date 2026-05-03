@@ -20,27 +20,56 @@
     
     /* 隠すためのユーティリティ */
     .hidden { display: none !important; }
+
+    /* スクロールバー非表示（スマホの小ネタ横スクロール用） */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-200 pb-24">
 
   <!-- ヘッダー -->
   <header class="bg-white shadow-sm sticky top-0 z-10">
-    <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
-        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg text-white">
-          <i data-lucide="zap" class="w-5 h-5"></i>
+    <div class="max-w-3xl mx-auto pt-2 md:py-0 md:h-16 flex flex-col justify-center">
+      <!-- 上段：ロゴとボタン、PC時は小ネタも -->
+      <div class="flex items-center justify-between gap-2 px-4 h-12 md:h-full">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+          <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg text-white">
+            <i data-lucide="zap" class="w-5 h-5"></i>
+          </div>
+          <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 hidden sm:block">
+            元素マスター
+          </h1>
+          
+          <!-- PC用: Dayバッジと小ネタ -->
+          <div class="hidden md:flex items-center gap-2 ml-2">
+            <div class="px-2 py-1 bg-yellow-100 text-yellow-700 font-bold text-sm rounded-full flex items-center gap-1 border border-yellow-200 shadow-sm shrink-0">
+              <i data-lucide="flame" class="w-4 h-4 text-orange-500"></i> <span class="day-count-badge">Day 1</span>
+            </div>
+            <div class="flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full max-w-md border border-slate-200" title="今日の小ネタ">
+              <i data-lucide="lightbulb" class="w-3 h-3 mr-1 text-yellow-500 shrink-0"></i>
+              <span class="header-trivia truncate font-medium"></span>
+            </div>
+          </div>
         </div>
-        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 hidden sm:block">
-          元素マスター
-        </h1>
-        <div class="ml-1 sm:ml-2 px-2 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs sm:text-sm rounded-full flex items-center gap-1 border border-yellow-200 shadow-sm">
-          <i data-lucide="flame" class="w-3 h-3 sm:w-4 sm:h-4 text-orange-500"></i> <span id="day-count-badge">Day 1</span>
+        <button onclick="openPeriodicModal()" class="flex items-center gap-1 font-bold text-white bg-slate-800 px-4 py-2 rounded-full hover:bg-slate-700 active:scale-95 transition-all shadow-md shrink-0">
+          <i data-lucide="grid" class="w-4 h-4"></i> 周期表
+        </button>
+      </div>
+      
+      <!-- スマホ用: 下段にDayバッジと小ネタを表示 -->
+      <div class="flex md:hidden items-center gap-2 w-full px-4 pb-2">
+        <div class="px-2 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs rounded-full flex items-center gap-1 border border-yellow-200 shadow-sm shrink-0">
+          <i data-lucide="flame" class="w-3 h-3 text-orange-500"></i> <span class="day-count-badge">Day 1</span>
+        </div>
+        <div class="flex items-center text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200 flex-1 min-w-0">
+          <i data-lucide="lightbulb" class="w-3 h-3 mr-1 text-yellow-500 shrink-0"></i>
+          <!-- 横スクロール可能にして全文読めるようにする -->
+          <div class="overflow-x-auto whitespace-nowrap hide-scrollbar font-medium w-full">
+            <span class="header-trivia pr-2"></span>
+          </div>
         </div>
       </div>
-      <button onclick="openPeriodicModal()" class="flex items-center gap-1 font-bold text-white bg-slate-800 px-4 py-2 rounded-full hover:bg-slate-700 active:scale-95 transition-all shadow-md">
-        <i data-lucide="grid" class="w-4 h-4"></i> 周期表
-      </button>
     </div>
   </header>
 
@@ -164,8 +193,9 @@
         <div id="battle-p1-area" class="w-full max-w-sm flex flex-col items-center"></div>
       </div>
 
-      <div class="h-32 bg-slate-800 flex items-center justify-center border-y-4 border-slate-950 z-10 px-4 text-center">
-        <h2 id="battle-center-text" class="text-3xl font-black text-yellow-400 min-h-[40px]">Ready...</h2>
+      <!-- 中央のディスプレイ領域（高さを広げて左寄せに） -->
+      <div class="h-40 md:h-48 bg-slate-800 flex items-center justify-center border-y-4 border-slate-950 z-10 px-6 py-4 w-full overflow-y-auto">
+        <div id="battle-center-text" class="text-xl md:text-2xl font-black text-white w-full max-w-lg text-left leading-relaxed">Ready...</div>
       </div>
 
       <div class="flex-1 bg-blue-600 flex flex-col items-center justify-center p-4 relative">
@@ -381,6 +411,20 @@
       { id: 118, symbol: 'Og', name: 'オガネソン', hint: 'ロシアのオガネシアンにちなむ、最後の元素。', desc: 'ロシアの物理学者オガネシアンにちなむ。現在知られる中で最も原子番号が大きい。', period: 7, group: 18 }
     ];
 
+    // --- トリビアデータ ---
+    const TRIVIA_LIST = [
+      "「ヘリウム」はギリシャ語の「太陽」が語源。地球より先に太陽の光から発見されました。",
+      "「酸素」の語源は「酸を作るもの」。昔の学者の勘違いから名付けられました。",
+      "宇宙の約98%は、「水素」と「ヘリウム」の2つだけでできています。",
+      "金(Au)はとてもよく伸びる金属。1グラムで約3kmの長さの糸になります！",
+      "人間の体は、重さの約65%が「酸素」、約18%が「炭素」でできています。",
+      "「カリウム」は英語（Potassium）とドイツ語（Kalium）で呼び方が違う元素の代表格です。",
+      "唯一、常温で「液体」の金属は水銀(Hg)だけ。他の金属はすべて固体です。",
+      "アルミニウムは昔、製錬が難しく金よりも価値が高い超高級金属でした。",
+      "ダイヤモンドと鉛筆の芯は、どちらも100%「炭素(C)」でできています。",
+      "「チタン」はギリシャ神話の巨人「タイタン」が名前の由来です。"
+    ];
+
     // --- State Management ---
     const State = {
       view: 'home',
@@ -427,7 +471,11 @@
         localStorage.setItem('elementMasterLastLogin', todayStr);
         localStorage.setItem('elementMasterLoginDays', loginDays);
       }
-      document.getElementById('day-count-badge').innerText = `Day ${loginDays}`;
+      document.querySelectorAll('.day-count-badge').forEach(el => el.innerText = `Day ${loginDays}`);
+
+      // 追加: 小ネタのランダム表示
+      const randomTrivia = TRIVIA_LIST[Math.floor(Math.random() * TRIVIA_LIST.length)];
+      document.querySelectorAll('.header-trivia').forEach(el => el.innerText = randomTrivia);
 
       updateHomeUI();
       renderSettingsCheckboxes();
@@ -880,7 +928,7 @@
       const centerTxt = document.getElementById('battle-center-text');
       if (state === 'ready') {
         centerTxt.innerText = 'Ready...';
-        centerTxt.className = "text-3xl font-black text-yellow-400 min-h-[40px]";
+        centerTxt.className = "text-xl md:text-2xl font-black text-white w-full max-w-lg text-center leading-relaxed";
         document.getElementById('battle-p1-area').innerHTML = '';
         document.getElementById('battle-p2-area').innerHTML = '';
         setTimeout(() => { 
@@ -898,55 +946,74 @@
       
       const el = battleElements[Math.floor(Math.random() * battleElements.length)];
       
-      const patterns = ['sym_from_name', 'name_from_sym'];
-      if (el.hint) {
-         patterns.push('sym_from_hint', 'name_from_hint');
-      }
-      const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
-
-      let q = '';
-      let aText = '';
-      let isAnswerSymbol = false;
-
-      if (selectedPattern === 'sym_from_name') {
-         q = `${el.name} の記号は？`;
-         aText = el.symbol;
-         isAnswerSymbol = true;
-      } else if (selectedPattern === 'name_from_sym') {
-         q = `記号 ${el.symbol} の名前は？`;
-         aText = el.name;
-      } else if (selectedPattern === 'sym_from_hint') {
-         q = `「${el.hint}」の記号は？`;
-         aText = el.symbol;
-         isAnswerSymbol = true;
-      } else if (selectedPattern === 'name_from_hint') {
-         q = `「${el.hint}」の名前は？`;
-         aText = el.name;
-      }
+      const isSymbol = Math.random() > 0.5;
+      const aText = isSymbol ? el.symbol : el.name;
       
-      let pool = isAnswerSymbol ? ELEMENTS_DATA.map(e => e.symbol) : ELEMENTS_DATA.map(e => e.name);
+      // 問題文のヘッダー部分
+      const qPrefix = isSymbol 
+        ? `この元素の <span class="text-blue-300">【記号】</span> は？\n` 
+        : `この元素の <span class="text-blue-300">【名前】</span> は？\n`;
+      
+      // ヒントの配列を作成（位置情報＋説明文を分割）
+      let hints = [];
+      hints.push(`第${el.period}周期、第${el.group}族に属しています。`);
+      
+      const descParts = el.desc.split('。').filter(p => p.trim() !== '');
+      descParts.forEach(part => {
+        hints.push(`${part}。`);
+      });
+
+      let pool = isSymbol ? ELEMENTS_DATA.map(e => e.symbol) : ELEMENTS_DATA.map(e => e.name);
       pool = pool.filter(item => item !== aText);
       const dummies = shuffleArray([...new Set(pool)]).slice(0, 3);
       const choices = shuffleArray([aText, ...dummies]);
 
-      State.battle.currentQ = { q, aText, choices, el };
+      State.battle.currentQ = { qPrefix, hints, aText, choices, el };
       State.battle.answers = { p1: null, p2: null };
       setBattleState('playing');
 
-      // Typing animation
+      // ヒントを段階的に表示するアニメーション
       if (State.battle.intervalId) clearInterval(State.battle.intervalId);
-      let i = 0;
-      const text = State.battle.currentQ.q;
+      
       const centerTxt = document.getElementById('battle-center-text');
-      // 文字数が多い場合はフォントサイズを少し下げる
-      centerTxt.className = `font-black text-white min-h-[40px] ${text.length > 20 ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'}`;
-      centerTxt.innerText = '';
+      centerTxt.className = "text-xl md:text-2xl font-black text-white w-full max-w-xl text-left leading-tight";
+      
+      let displayedHtml = qPrefix.replace('\n', '<br/>');
+      centerTxt.innerHTML = displayedHtml;
+      
+      let currentHintIndex = 0;
+      let currentCharIndex = 0;
+      let isWaiting = false;
       
       State.battle.intervalId = setInterval(() => {
-        centerTxt.innerText = text.slice(0, i + 1);
-        i++;
-        if (i >= text.length) clearInterval(State.battle.intervalId);
-      }, 85); // 85ms per char
+        if (isWaiting) return;
+
+        if (currentHintIndex < hints.length) {
+          const currentHint = hints[currentHintIndex];
+          
+          if (currentCharIndex === 0) {
+            displayedHtml += `<div class="text-yellow-300 mt-2 text-base md:text-lg">・`;
+          }
+
+          displayedHtml += currentHint[currentCharIndex];
+          centerTxt.innerHTML = displayedHtml + `</div>`;
+          currentCharIndex++;
+
+          // 1つのヒントが出終わった時
+          if (currentCharIndex >= currentHint.length) {
+            displayedHtml += `</div>`;
+            currentCharIndex = 0;
+            currentHintIndex++;
+            isWaiting = true;
+            // 2秒間待ってから次のヒントを書き始める
+            setTimeout(() => {
+              isWaiting = false;
+            }, 2000); 
+          }
+        } else {
+          clearInterval(State.battle.intervalId);
+        }
+      }, 75); // 1文字 75ms
     }
 
     function renderBattleChoices() {
@@ -975,7 +1042,6 @@
           }
           
           const disabledAttr = (myAnswer || someoneCorrect) ? 'disabled' : '';
-          // 画面に描画されるため文字列で関数を渡す
           html += `<button ${disabledAttr} onclick="handleBattleAnswer('${player}', '${c}')" class="${btnClass}">${c}</button>`;
         });
         html += '</div>';
@@ -999,22 +1065,36 @@
         playSound('correct');
         State.battle.scores[player]++;
         updateBattleScores();
-        renderBattleChoices(); // update colors
-        if (State.battle.intervalId) clearInterval(State.battle.intervalId); // stop typing
-        document.getElementById('battle-center-text').innerText = State.battle.currentQ.q; // complete text
+        renderBattleChoices(); 
+        
+        // 正解が出たらタイピングを止め、すべてのヒントを即座に表示する
+        if (State.battle.intervalId) clearInterval(State.battle.intervalId); 
+        
+        let fullText = State.battle.currentQ.qPrefix.replace('\n', '<br/>');
+        State.battle.currentQ.hints.forEach(h => {
+           fullText += `<div class="text-yellow-300 mt-2 text-base md:text-lg">・${h}</div>`;
+        });
+        document.getElementById('battle-center-text').innerHTML = fullText;
 
         if (State.battle.scores.p1 >= 5 || State.battle.scores.p2 >= 5) {
           setTimeout(() => finishBattle(), 1800);
         } else {
-          setTimeout(() => generateBattleQuestion(), 1800);
+          setTimeout(() => generateBattleQuestion(), 2000);
         }
       } else {
         playSound('wrong');
         renderBattleChoices();
         const opp = player === 'p1' ? 'p2' : 'p1';
         if (State.battle.answers[opp] && State.battle.answers[opp].isCorrect === false) {
-          // 両方間違え
-          setTimeout(() => generateBattleQuestion(), 1500);
+          // 変更: 両者不正解の場合、正解を表示して待つ
+          if (State.battle.intervalId) clearInterval(State.battle.intervalId);
+          document.getElementById('battle-center-text').innerHTML = `
+            <div class="text-center w-full">
+              <div class="text-rose-400 text-xl md:text-2xl font-bold mb-2">両者不正解...</div>
+              <div class="text-white text-2xl md:text-3xl font-black">正解は「<span class="text-emerald-400">${State.battle.currentQ.aText}</span>」</div>
+            </div>
+          `;
+          setTimeout(() => generateBattleQuestion(), 2500);
         }
       }
     }
