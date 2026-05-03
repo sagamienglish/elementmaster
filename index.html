@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>元素記号マスター</title>
+  
+  <!-- Tailwind CSS (スタイリング用) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons (アイコン用) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* フリップアニメーション用カスタムCSS */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-3d { transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .backface-hidden { backface-visibility: hidden; }
+    
+    /* 隠すためのユーティリティ */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-200 pb-24">
+
+  <!-- ヘッダー -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg text-white">
+          <i data-lucide="zap" class="w-5 h-5"></i>
+        </div>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 hidden sm:block">
+          元素マスター
+        </h1>
+        <div class="ml-1 sm:ml-2 px-2 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs sm:text-sm rounded-full flex items-center gap-1 border border-yellow-200 shadow-sm">
+          <i data-lucide="flame" class="w-3 h-3 sm:w-4 sm:h-4 text-orange-500"></i> <span id="day-count-badge">Day 1</span>
+        </div>
+      </div>
+      <button onclick="openPeriodicModal()" class="flex items-center gap-1 font-bold text-white bg-slate-800 px-4 py-2 rounded-full hover:bg-slate-700 active:scale-95 transition-all shadow-md">
+        <i data-lucide="grid" class="w-4 h-4"></i> 周期表
+      </button>
+    </div>
+  </header>
+
+  <main id="app-container" class="max-w-3xl mx-auto p-4">
+    
+    <!-- ==================== HOME VIEW ==================== -->
+    <div id="view-home" class="space-y-8 animate-in fade-in duration-500">
+      
+      <div class="bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-400 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+        <i data-lucide="zap" class="w-40 h-40 absolute -top-10 -right-10 opacity-10"></i>
+        <h2 class="text-3xl md:text-4xl font-extrabold mb-2 relative z-10 italic tracking-wider font-serif">The Road to Element Master</h2>
+      </div>
+
+      <div class="space-y-6">
+        <!-- コース選択 -->
+        <section>
+          <h3 class="flex items-center gap-2 text-lg font-bold text-slate-700 mb-3">
+            <i data-lucide="award" class="w-5 h-5 text-yellow-500"></i> 1. コースを選ぶ
+          </h3>
+          <div class="grid gap-3 md:grid-cols-3">
+            <button onclick="setCourse('basic')" id="btn-course-basic" class="course-btn relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden border-slate-800 bg-white shadow-md ring-2 ring-slate-200 ring-offset-1">
+              <div class="w-3 h-full absolute left-0 top-0 bg-blue-500"></div>
+              <div class="pl-3">
+                <div class="font-black text-slate-800">基礎 (1〜20番)</div>
+                <div class="text-xs text-slate-500 mt-1 font-medium">周期表の位置も覚える！</div>
+              </div>
+            </button>
+            <button onclick="setCourse('intermediate')" id="btn-course-intermediate" class="course-btn relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden border-slate-200 hover:border-slate-400 bg-slate-50">
+              <div class="w-3 h-full absolute left-0 top-0 bg-green-500"></div>
+              <div class="pl-3">
+                <div class="font-black text-slate-800">中級 (21番〜)</div>
+                <div class="text-xs text-slate-500 mt-1 font-medium">覚えたい元素を自由に選択</div>
+              </div>
+            </button>
+            <button onclick="setCourse('battle')" id="btn-course-battle" class="course-btn relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden border-slate-200 hover:border-slate-400 bg-slate-50">
+              <div class="w-3 h-full absolute left-0 top-0 bg-rose-500"></div>
+              <div class="pl-3">
+                <div class="font-black text-slate-800">対戦 (早押し)</div>
+                <div class="text-xs text-slate-500 mt-1 font-medium">1つの画面で2人対戦！</div>
+              </div>
+            </button>
+          </div>
+
+          <div id="settings-area" class="mt-3 text-right hidden">
+            <button onclick="openSettingsModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200">
+              <i data-lucide="settings" class="w-4 h-4"></i> 出題範囲を設定 (<span id="custom-count">0</span>個選択中)
+            </button>
+          </div>
+        </section>
+
+        <!-- 遊び方選択 -->
+        <section id="format-section" class="animate-in slide-in-from-top-2">
+          <h3 class="flex items-center gap-2 text-lg font-bold text-slate-700 mb-3">
+            <i data-lucide="book-open" class="w-5 h-5 text-emerald-500"></i> 2. 遊び方を選ぶ
+          </h3>
+          <div class="grid gap-3 md:grid-cols-3">
+            <button onclick="setFormat('choice')" id="btn-format-choice" class="format-btn flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all text-center border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md">
+              <i data-lucide="grid" class="w-7 h-7 mb-2"></i>
+              <div class="font-bold">四択クイズ</div>
+              <div class="text-xs opacity-70 mt-1">選択肢から選ぶ基本モード</div>
+            </button>
+            <button onclick="setFormat('typing')" id="btn-format-typing" class="format-btn flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all text-center border-slate-200 text-slate-600 hover:bg-white">
+              <i data-lucide="keyboard" class="w-7 h-7 mb-2"></i>
+              <div class="font-bold">タイピング</div>
+              <div class="text-xs opacity-70 mt-1">キーボード入力でスペル定着</div>
+            </button>
+            <button onclick="setFormat('flashcard')" id="btn-format-flashcard" class="format-btn flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all text-center border-slate-200 text-slate-600 hover:bg-white">
+              <i data-lucide="rotate-ccw" class="w-7 h-7 mb-2"></i>
+              <div class="font-bold">フラッシュカード</div>
+              <div class="text-xs opacity-70 mt-1">自分の頭で思い出す特訓</div>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <button onclick="startGame()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+        <i data-lucide="play" id="start-icon" class="w-5 h-5 fill-current"></i>
+        <span id="start-text">5問クイズをはじめる</span>
+      </button>
+    </div>
+
+    <!-- ==================== GAME VIEW ==================== -->
+    <div id="view-game" class="hidden max-w-xl mx-auto">
+      <div class="mb-6 flex items-center justify-between font-bold text-slate-500">
+        <div>問題 <span id="game-q-num" class="text-xl text-slate-800">1</span> / 5</div>
+        <div id="game-progress" class="flex gap-1"></div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 mb-6 text-center">
+        <div id="game-mini-periodic" class="hidden bg-slate-100 p-2 rounded-xl mb-4 border border-slate-200 inline-block">
+          <!-- Mini Grid Injected Here -->
+        </div>
+        
+        <h2 id="game-question-text" class="font-black text-slate-800 leading-tight mt-4 text-3xl"></h2>
+        
+        <div id="game-hint-area" class="mt-6 hidden">
+          <button id="btn-show-hint" onclick="showHint()" class="text-sm font-bold text-indigo-500 bg-indigo-50 px-4 py-2 rounded-full hover:bg-indigo-100 flex items-center gap-1 mx-auto transition-transform active:scale-95">
+            <i data-lucide="lightbulb" class="w-4 h-4"></i> ヒントを見る
+          </button>
+          <div id="hint-text" class="hidden text-sm font-bold text-indigo-700 bg-indigo-100 px-4 py-3 rounded-xl inline-block animate-in zoom-in-95"></div>
+        </div>
+      </div>
+
+      <div id="game-input-area" class="w-full">
+        <!-- Choices / Typing / Flashcard injected here -->
+      </div>
+      
+      <div id="game-feedback-area" class="hidden w-full">
+        <!-- Inline Feedback injected here -->
+      </div>
+    </div>
+
+    <!-- ==================== BATTLE VIEW ==================== -->
+    <div id="view-battle" class="hidden fixed inset-0 bg-slate-900 flex flex-col overflow-hidden z-50 font-sans">
+      <button onclick="goHome()" class="absolute top-4 left-4 z-[60] flex items-center gap-1 text-white/50 hover:text-white p-2 bg-black/40 rounded-full font-bold text-sm">
+        <i data-lucide="x" class="w-4 h-4"></i> やめる
+      </button>
+
+      <div class="flex-1 bg-rose-600 flex flex-col items-center justify-center p-4 relative transform rotate-180">
+        <div id="battle-p1-score" class="absolute top-4 right-4 text-white font-black text-4xl opacity-50">0</div>
+        <div id="battle-p1-area" class="w-full max-w-sm flex flex-col items-center"></div>
+      </div>
+
+      <div class="h-32 bg-slate-800 flex items-center justify-center border-y-4 border-slate-950 z-10 px-4 text-center">
+        <h2 id="battle-center-text" class="text-3xl font-black text-yellow-400 min-h-[40px]">Ready...</h2>
+      </div>
+
+      <div class="flex-1 bg-blue-600 flex flex-col items-center justify-center p-4 relative">
+        <div id="battle-p2-score" class="absolute top-4 right-4 text-white font-black text-4xl opacity-50">0</div>
+        <div id="battle-p2-area" class="w-full max-w-sm flex flex-col items-center"></div>
+      </div>
+      
+      <div id="battle-finish-overlay" class="hidden absolute inset-0 bg-slate-900 flex-col items-center justify-center text-white p-8 z-[70]">
+        <h2 id="battle-winner-text" class="text-4xl font-black text-yellow-400 mb-4"></h2>
+        <div id="battle-final-score" class="text-2xl font-bold mb-8"></div>
+        <button onclick="goHome()" class="py-4 px-8 bg-blue-600 rounded-full font-bold text-xl hover:bg-blue-500">ホームに戻る</button>
+      </div>
+    </div>
+
+    <!-- ==================== RESULT VIEW ==================== -->
+    <div id="view-result" class="hidden space-y-6 animate-in zoom-in-95 duration-500 max-w-lg mx-auto">
+      <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500"></div>
+        <h2 class="text-xl font-bold text-slate-500 mb-2">学習結果</h2>
+        <div class="text-6xl font-black text-slate-800 mb-2"><span id="result-score">0</span> <span class="text-3xl text-slate-400">/ 5</span></div>
+        <div class="flex justify-center gap-6 text-sm font-bold text-slate-600 bg-slate-50 py-3 rounded-2xl">
+          <div class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4 text-blue-500"></i> <span id="result-time">0</span>秒</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="startGame()" class="py-4 bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-700 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i> もう一度
+        </button>
+        <button onclick="openPeriodicModal()" class="py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md">
+          <i data-lucide="grid" class="w-5 h-5"></i> 周期表
+        </button>
+      </div>
+      <button onclick="goHome()" class="w-full py-4 text-slate-500 font-bold hover:bg-slate-100 rounded-2xl transition-colors">ホームに戻る</button>
+
+      <div id="mistakes-area" class="mt-8 hidden">
+        <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-rose-500"></i> 復習リスト
+        </h3>
+        <div id="mistakes-list" class="space-y-3"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+  
+  <!-- 設定モーダル (中級) -->
+  <div id="modal-settings" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[80vh]">
+      <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+        <h3 class="font-bold text-lg">出題範囲の選択 (21番〜)</h3>
+        <button onclick="closeSettingsModal()" class="p-2 bg-slate-200 rounded-full hover:bg-slate-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="flex gap-2 p-4 bg-white border-b">
+        <button onclick="selectAllCustom()" class="text-sm px-3 py-1 bg-slate-100 rounded-lg hover:bg-slate-200 font-bold text-slate-700">すべて選択</button>
+        <button onclick="clearAllCustom()" class="text-sm px-3 py-1 bg-slate-100 rounded-lg hover:bg-slate-200 font-bold text-slate-700">すべて解除</button>
+      </div>
+      <div id="settings-checkboxes" class="p-4 overflow-y-auto grid grid-cols-2 md:grid-cols-3 gap-2 flex-1">
+        <!-- Checkboxes injected here -->
+      </div>
+      <div class="p-4 border-t bg-slate-50">
+        <button onclick="closeSettingsModal()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold">決定して閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 周期表モーダル -->
+  <div id="modal-periodic" class="hidden fixed inset-0 z-50 flex flex-col bg-slate-900/90 backdrop-blur-sm animate-in fade-in duration-200">
+    <div class="flex items-center justify-between p-4 bg-slate-800 text-white shadow-md shrink-0">
+      <div>
+        <h2 class="text-xl font-black flex items-center gap-2"><i data-lucide="grid" class="w-5 h-5 text-blue-400"></i> 周期表</h2>
+        <p class="text-xs text-slate-400 mt-1">1〜20番と選択中の元素が表示されます。</p>
+      </div>
+      <div class="flex items-center gap-2 md:gap-4">
+        <a href="https://sw111.tsho.jp/08rk/kk/contents_pdf/kk_048.pdf" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-blue-300 bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg transition-colors whitespace-nowrap">
+          詳細PDFを見る
+        </a>
+        <button onclick="closePeriodicModal()" class="p-2 bg-slate-700 rounded-full hover:bg-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-auto p-2 md:p-8 flex items-center justify-center">
+      <div class="bg-white p-2 md:p-4 rounded-xl md:rounded-3xl shadow-2xl w-full max-w-6xl border border-slate-700">
+        <div id="periodic-grid" class="grid grid-cols-[repeat(18,minmax(0,1fr))] gap-0.5 md:gap-1.5 w-full">
+          <!-- Cards injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // --- データ定義 ---
+    const ELEMENTS_DATA = [
+      { id: 1, symbol: 'H', name: '水素', hint: '宇宙で最も多い。未来のクリーンエネルギー。', desc: '宇宙で最も多い元素。クリーンなエネルギー源として期待。', period: 1, group: 1 },
+      { id: 2, symbol: 'He', name: 'ヘリウム', hint: '風船を浮かせる。吸うと声が高くなるガス。', desc: '風船を浮かせる軽いガス。吸うと声が高くなる。', period: 1, group: 18 },
+      { id: 3, symbol: 'Li', name: 'リチウム', hint: 'スマホやPCのバッテリーに使われる。', desc: 'スマホやPCの「リチウムイオン電池」に必須の金属。', period: 2, group: 1 },
+      { id: 4, symbol: 'Be', name: 'ベリリウム', hint: 'エメラルドなどの宝石に含まれる。軽くて硬い。', desc: 'エメラルドなどの宝石に含まれる。軽くて硬い。', period: 2, group: 2 },
+      { id: 5, symbol: 'B', name: 'ホウ素', hint: 'ゴキブリ退治の団子や、耐熱ガラスに。', desc: '耐熱ガラスや、ゴキブリ退治の「ホウ酸団子」に使われる。', period: 2, group: 13 },
+      { id: 6, symbol: 'C', name: '炭素', hint: '鉛筆の芯やダイヤモンドの正体。', desc: '鉛筆の芯もダイヤモンドも、人間の体も炭素が主役。', period: 2, group: 14 },
+      { id: 7, symbol: 'N', name: '窒素', hint: '空気の約78%を占めるガス。', desc: '空気の約78%を占める。ポテトチップスの袋の膨らみの中身。', period: 2, group: 15 },
+      { id: 8, symbol: 'O', name: '酸素', hint: '私たちが呼吸するために必要。モノが燃えるのにも。', desc: '私たちが呼吸に使う。モノが燃えるのにも必要。', period: 2, group: 16 },
+      { id: 9, symbol: 'F', name: 'フッ素', hint: '虫歯予防の歯磨き粉や、フライパンの表面加工。', desc: '虫歯予防の歯磨き粉や、焦げ付かないフライパンの表面加工に。', period: 2, group: 17 },
+      { id: 10, symbol: 'Ne', name: 'ネオン', hint: '夜の街を赤く彩る光の正体。', desc: '夜の街を赤く彩るネオンサインの光の正体。', period: 2, group: 18 },
+      { id: 11, symbol: 'Na', name: 'ナトリウム', hint: '食塩の主成分。水に入れると激しく反応する。', desc: '食塩（塩化ナトリウム）の主成分。水に入れると爆発的に反応。', period: 3, group: 1 },
+      { id: 12, symbol: 'Mg', name: 'マグネシウム', hint: '豆腐を固める「にがり」の主成分。', desc: '豆腐を固める「にがり」の主成分。燃やすと強い光を出す。', period: 3, group: 2 },
+      { id: 13, symbol: 'Al', name: 'アルミニウム', hint: '1円玉や身近なホイルに使われる軽い金属。', desc: '1円玉やアルミホイルでおなじみの、軽くてリサイクルしやすい金属。', period: 3, group: 13 },
+      { id: 14, symbol: 'Si', name: 'ケイ素', hint: 'パソコンの半導体やガラスの主成分。', desc: 'パソコンの半導体の材料。ガラスの主成分でもある。', period: 3, group: 14 },
+      { id: 15, symbol: 'P', name: 'リン', hint: 'マッチの摩擦面や、植物を育てる肥料。', desc: 'マッチの摩擦面や、植物を育てる肥料に欠かせない。', period: 3, group: 15 },
+      { id: 16, symbol: 'S', name: '硫黄', hint: '温泉の独特な匂いの元。火薬にも。', desc: '温泉の独特な匂いの元（硫化水素）。火薬にも使われる。', period: 3, group: 16 },
+      { id: 17, symbol: 'Cl', name: '塩素', hint: 'プールの消毒薬や漂白剤のツンとした匂いの元。', desc: 'プールの消毒薬や、漂白剤のツンとした匂いの元。', period: 3, group: 17 },
+      { id: 18, symbol: 'Ar', name: 'アルゴン', hint: '蛍光灯や電球の中に封入されるガス。', desc: '蛍光灯や電球の中に封入されて、フィラメントを守るガス。', period: 3, group: 18 },
+      { id: 19, symbol: 'K', name: 'カリウム', hint: 'バナナに多く含まれる、植物の成長に重要なミネラル。', desc: 'バナナに多く含まれるミネラル。植物の成長に超重要。', period: 4, group: 1 },
+      { id: 20, symbol: 'Ca', name: 'カルシウム', hint: '骨や歯を丈夫にする。牛乳に多い。', desc: '骨や歯を丈夫にする。牛乳や小魚に多く含まれる。', period: 4, group: 2 },
+      { id: 21, symbol: 'Sc', name: 'スカンジウム', hint: '野球のバットや自転車のフレームを軽く強くする。', desc: '野球のバットや自転車のフレームに混ぜて軽く強くする。', period: 4, group: 3 },
+      { id: 22, symbol: 'Ti', name: 'チタン', hint: '軽くてサビない。メガネフレームや人工骨に。', desc: '軽くてサビない最強クラスの金属。メガネフレームや人工骨に。', period: 4, group: 4 },
+      { id: 23, symbol: 'V', name: 'バナジウム', hint: '硬い工具を作るために鉄に混ぜる。天然水にも。', desc: '硬い鉄（工具など）を作るために混ぜられる。天然水にも含まれる。', period: 4, group: 5 },
+      { id: 24, symbol: 'Cr', name: 'クロム', hint: 'サビない鉄「ステンレス」の材料。', desc: 'サビない鉄「ステンレス」の材料。水道の蛇口のピカピカメッキ。', period: 4, group: 6 },
+      { id: 25, symbol: 'Mn', name: 'マンガン', hint: '乾電池（マンガン電池）に使われる。', desc: '乾電池（マンガン電池）の材料に使われる。', period: 4, group: 7 },
+      { id: 26, symbol: 'Fe', name: '鉄', hint: '血液を赤くし、建築や車を支える金属。', desc: '血液を赤くしている。建築や車など人類を支える金属。', period: 4, group: 8 },
+      { id: 27, symbol: 'Co', name: 'コバルト', hint: '美しい青い絵の具の原料や強力な磁石。', desc: '美しい青い絵の具の原料。強力な磁石にも。', period: 4, group: 9 },
+      { id: 28, symbol: 'Ni', name: 'ニッケル', hint: '50円玉や100円玉に含まれるサビに強い金属。', desc: '50円玉や100円玉に含まれる。サビに強いのでメッキに多用。', period: 4, group: 10 },
+      { id: 29, symbol: 'Cu', name: '銅', hint: '10円玉の材料。世界中の電線に使われる。', desc: '10円玉の材料。電気をよく通すので世界中の電線に。', period: 4, group: 11 },
+      { id: 30, symbol: 'Zn', name: '亜鉛', hint: 'トタン屋根のメッキ。人間の味覚を保つ。', desc: 'トタン屋根のサビ防止メッキ。人間の味覚を正常に保つミネラル。', period: 4, group: 12 },
+      { id: 31, symbol: 'Ga', name: 'ガリウム', hint: '青色LEDの材料。手のひらの温度で溶ける。', desc: '青色LEDの材料。手のひらの温度（約30度）で溶ける不思議な金属。', period: 4, group: 13 },
+      { id: 32, symbol: 'Ge', name: 'ゲルマニウム', hint: '初期のラジオやトランジスタに使われた半導体。', desc: '初期のラジオやトランジスタに使われた半導体。', period: 4, group: 14 },
+      { id: 33, symbol: 'As', name: 'ヒ素', hint: 'かつては毒薬だったが、今は半導体材料。', desc: 'かつては毒薬として有名だったが、今は半導体の重要な材料。', period: 4, group: 15 },
+      { id: 34, symbol: 'Se', name: 'セレン', hint: '光を当てると電気を通す。コピー機のドラムに。', desc: '光を当てると電気を通す性質があり、コピー機のドラムに使われる。', period: 4, group: 16 },
+      { id: 35, symbol: 'Br', name: '臭素', hint: '常温で液体の「唯一の非金属元素」。', desc: '常温で液体の「唯一の非金属元素」。嫌なニオイがする。', period: 4, group: 17 },
+      { id: 36, symbol: 'Kr', name: 'クリプトン', hint: 'カメラのフラッシュランプなどに使われる。', desc: 'カメラのフラッシュランプなどに使われる、光りやすいガス。', period: 4, group: 18 },
+      { id: 37, symbol: 'Rb', name: 'ルビジウム', hint: '極めて正確な「原子時計」の研究に使われる。', desc: '極めて正確な時を刻む「原子時計」の研究に使われる。', period: 5, group: 1 },
+      { id: 38, symbol: 'Sr', name: 'ストロンチウム', hint: '花火を真っ赤に燃やす材料。', desc: '花火を真っ赤に燃やす（炎色反応）ための材料。', period: 5, group: 2 },
+      { id: 39, symbol: 'Y', name: 'イットリウム', hint: '赤色LEDや超伝導材料に使われる。', desc: '赤色LEDや超伝導材料などに使われる。', period: 5, group: 3 },
+      { id: 40, symbol: 'Zr', name: 'ジルコニウム', hint: '模造ダイヤ（キュービックジルコニア）やセラミックス。', desc: '模造ダイヤやセラミックス。', period: 5, group: 4 },
+      { id: 41, symbol: 'Nb', name: 'ニオブ', hint: 'リニアモーターカーなどの超伝導磁石。', desc: 'リニアモーターカーなどの超伝導磁石。', period: 5, group: 5 },
+      { id: 42, symbol: 'Mo', name: 'モリブデン', hint: '自転車のフレームなどの特殊鋼。', desc: '自転車のフレームなどの特殊鋼。', period: 5, group: 6 },
+      { id: 43, symbol: 'Tc', name: 'テクネチウム', hint: '医療現場で骨の検査などに使われる。', desc: '医療現場で骨の検査などに使われる人工元素。', period: 5, group: 7 },
+      { id: 44, symbol: 'Ru', name: 'ルテニウム', hint: 'ハードディスクの記録層に使われる。', desc: 'ハードディスクの記録層に使われる。', period: 5, group: 8 },
+      { id: 45, symbol: 'Rh', name: 'ロジウム', hint: '車の排気ガス浄化触媒やメッキ。', desc: '車の排気ガス浄化触媒やメッキ。', period: 5, group: 9 },
+      { id: 46, symbol: 'Pd', name: 'パラジウム', hint: '歯科治療の銀歯の材料や触媒。', desc: '歯科治療の銀歯の材料や触媒。', period: 5, group: 10 },
+      { id: 47, symbol: 'Ag', name: '銀', hint: '最も電気と熱を通す。アクセサリーに。', desc: '金属の中で最も電気と熱をよく通す。アクセサリーや抗菌製品に。', period: 5, group: 11 },
+      { id: 48, symbol: 'Cd', name: 'カドミウム', hint: 'ニカド電池の材料。かつての公害病の原因物質。', desc: 'ニカド電池の材料。かつての公害病（イタイイタイ病）の原因物質。', period: 5, group: 12 },
+      { id: 49, symbol: 'In', name: 'インジウム', hint: 'スマホの透明な電極（タッチパネル）に使われる。', desc: 'スマホの透明な電極に使われる。', period: 5, group: 13 },
+      { id: 50, symbol: 'Sn', name: 'スズ', hint: '缶詰の「ブリキ」の材料。', desc: '缶詰の「ブリキ」は鉄にスズをメッキしたもの。', period: 5, group: 14 },
+      { id: 51, symbol: 'Sb', name: 'アンチモン', hint: '難燃剤としてカーテンなどに含まれる。', desc: '難燃剤としてカーテンなどに含まれる。', period: 5, group: 15 },
+      { id: 52, symbol: 'Te', name: 'テルル', hint: 'DVDなどの書き換え可能な記録メディアに。', desc: 'DVDなどの書き換え可能な記録メディアに。', period: 5, group: 16 },
+      { id: 53, symbol: 'I', name: 'ヨウ素', hint: 'うがい薬でおなじみ。ワカメに多い。', desc: 'うがい薬や消毒薬でおなじみ。ワカメなどの海藻に多く含まれる。', period: 5, group: 17 },
+      { id: 54, symbol: 'Xe', name: 'キセノン', hint: '車の明るいヘッドライトに使われるガス。', desc: '車の明るいヘッドライト（キセノンランプ）に使われるガス。', period: 5, group: 18 },
+      { id: 55, symbol: 'Cs', name: 'セシウム', hint: '1秒の長さを決める「原子時計」の基準。', desc: '1秒の長さを決める極めて正確な「原子時計」の基準として活躍。', period: 6, group: 1 },
+      { id: 56, symbol: 'Ba', name: 'バリウム', hint: '胃のX線検査で飲む白いドロドロ。', desc: '胃のX線検査（レントゲン）の造影剤として飲むあの白いドロドロ。', period: 6, group: 2 },
+      { id: 57, symbol: 'La', name: 'ランタン', hint: 'カメラのレンズなどに使われる。', desc: 'カメラのレンズなどに使われる。', period: 8, group: 4 },
+      { id: 58, symbol: 'Ce', name: 'セリウム', hint: 'ガラスの研磨剤やライターの石。', desc: 'ガラスの研磨剤やライターの石。', period: 8, group: 5 },
+      { id: 59, symbol: 'Pr', name: 'プラセオジム', hint: '溶接用ゴーグルのガラスに使われる。', desc: '溶接用ゴーグルのガラスなどに使われる。', period: 8, group: 6 },
+      { id: 60, symbol: 'Nd', name: 'ネオジム', hint: 'イヤホンやモーターの強力な磁石。', desc: 'イヤホンやモーターの強力なネオジム磁石。', period: 8, group: 7 },
+      { id: 61, symbol: 'Pm', name: 'プロメチウム', hint: '特殊な蛍光塗料や原子力電池。', desc: '特殊な蛍光塗料や原子力電池。', period: 8, group: 8 },
+      { id: 62, symbol: 'Sm', name: 'サマリウム', hint: '熱に強い強力な磁石（サマリウムコバルト磁石）。', desc: '熱に強い強力な磁石。', period: 8, group: 9 },
+      { id: 63, symbol: 'Eu', name: 'ユウロピウム', hint: 'テレビの赤色蛍光体に使われる。', desc: 'テレビやLEDの赤色蛍光体に使われる。', period: 8, group: 10 },
+      { id: 64, symbol: 'Gd', name: 'ガドリニウム', hint: 'MRI検査の造影剤として使われる。', desc: 'MRI検査の造影剤として使われる。', period: 8, group: 11 },
+      { id: 65, symbol: 'Tb', name: 'テルビウム', hint: 'テレビの緑色蛍光体などに使われる。', desc: 'テレビの緑色蛍光体などに使われる。', period: 8, group: 12 },
+      { id: 66, symbol: 'Dy', name: 'ジスプロシウム', hint: 'ハイブリッド車のモーター磁石。', desc: 'ネオジム磁石の耐熱性を上げるために添加される。', period: 8, group: 13 },
+      { id: 67, symbol: 'Ho', name: 'ホルミウム', hint: '医療用レーザーメスなどに使われる。', desc: '医療用レーザーメスなどに使われる。', period: 8, group: 14 },
+      { id: 68, symbol: 'Er', name: 'エルビウム', hint: '光ファイバーの通信増幅器に使われる。', desc: '光ファイバーの通信増幅器に使われる。', period: 8, group: 15 },
+      { id: 69, symbol: 'Tm', name: 'ツリウム', hint: '携帯用X線発生装置に使われる。', desc: '携帯用X線発生装置に使われる。', period: 8, group: 16 },
+      { id: 70, symbol: 'Yb', name: 'イッテルビウム', hint: '工業用の強力なレーザー加工機に。', desc: '工業用の強力なファイバーレーザーに使われる。', period: 8, group: 17 },
+      { id: 71, symbol: 'Lu', name: 'ルテチウム', hint: 'PET検査の検出器などに使われる。', desc: 'PET検査の検出器などに使われる。', period: 8, group: 18 },
+      { id: 72, symbol: 'Hf', name: 'ハフニウム', hint: '原子炉の制御棒やプラズマ切断機。', desc: '原子炉の制御棒やプラズマ切断機。', period: 6, group: 4 },
+      { id: 73, symbol: 'Ta', name: 'タンタル', hint: 'スマホの小型コンデンサに欠かせない。', desc: 'スマホなどの小型コンデンサに欠かせない。', period: 6, group: 5 },
+      { id: 74, symbol: 'W', name: 'タングステン', hint: '最も熱に強く溶けにくい。昔の電球のフィラメント。', desc: '金属の中で最も熱に強く、溶けにくい。昔の白熱電球のフィラメント。', period: 6, group: 6 },
+      { id: 75, symbol: 'Re', name: 'レニウム', hint: 'ジェットエンジンの耐熱合金。', desc: 'ジェットエンジンのタービンブレードなどの耐熱合金。', period: 6, group: 7 },
+      { id: 76, symbol: 'Os', name: 'オスミウム', hint: '万年筆のペン先に使われる非常に硬い金属。', desc: '万年筆のペン先に使われる非常に硬い金属。', period: 6, group: 8 },
+      { id: 77, symbol: 'Ir', name: 'イリジウム', hint: '車の点火プラグや万年筆のペン先。', desc: '車の点火プラグや万年筆のペン先。', period: 6, group: 9 },
+      { id: 78, symbol: 'Pt', name: '白金', hint: '車の排気ガスをきれいにするフィルター。高級ジュエリー。', desc: '車の排気ガスをきれいにするフィルター。高級ジュエリー。', period: 6, group: 10 },
+      { id: 79, symbol: 'Au', name: '金', hint: '絶対にサビない永遠の輝き。スマホの内部にも。', desc: '絶対にサビない永遠の輝き。電気をよく通すのでスマホの内部にも。', period: 6, group: 11 },
+      { id: 80, symbol: 'Hg', name: '水銀', hint: '常温で唯一液体の金属。昔の体温計。', desc: '常温で「唯一液体の金属」。昔の体温計や蛍光灯に使われていた。', period: 6, group: 12 },
+      { id: 81, symbol: 'Tl', name: 'タリウム', hint: '特殊なガラスや高温超伝導体。昔は殺鼠剤。', desc: '特殊なガラスなどに。毒性が強い。', period: 6, group: 13 },
+      { id: 82, symbol: 'Pb', name: '鉛', hint: '重くて柔らかい。放射線を防ぐ壁。', desc: 'とても重くて柔らかい金属。車のバッテリーや、放射線を防ぐ壁に。', period: 6, group: 14 },
+      { id: 83, symbol: 'Bi', name: 'ビスマス', hint: '胃薬や、美しい虹色の結晶として知られる。', desc: '胃薬や、美しい人工結晶として知られる。', period: 6, group: 15 },
+      { id: 84, symbol: 'Po', name: 'ポロニウム', hint: '静電気除去ブラシなどに使われる放射性元素。', desc: '静電気除去ブラシなどに使われる放射性元素。', period: 6, group: 16 },
+      { id: 85, symbol: 'At', name: 'アスタチン', hint: '地球上にほんのわずかしか存在しない幻の元素。', desc: '地球上にほんのわずかしか存在しない幻の元素。', period: 6, group: 17 },
+      { id: 86, symbol: 'Rn', name: 'ラドン', hint: 'ラドン温泉に含まれる放射性ガス。', desc: '温泉（ラドン温泉）に含まれる放射性ガス。', period: 6, group: 18 },
+      { id: 87, symbol: 'Fr', name: 'フランシウム', hint: '極めて不安定であっという間に崩壊する。', desc: '極めて不安定で、あっという間に別の元素に崩壊してしまう。', period: 7, group: 1 },
+      { id: 88, symbol: 'Ra', name: 'ラジウム', hint: 'キュリー夫人が発見。昔は光る塗料に。', desc: 'キュリー夫人が発見。かつては暗闇で光る塗料に使われた。', period: 7, group: 2 },
+      { id: 89, symbol: 'Ac', name: 'アクチニウム', hint: '強い放射能を持つ。', desc: '強い放射能を持つ。', period: 9, group: 4 },
+      { id: 90, symbol: 'Th', name: 'トリウム', hint: '昔のキャンプ用ランタンのマントル。', desc: '昔のガスランタンの網（マントル）などに使われた。', period: 9, group: 5 },
+      { id: 91, symbol: 'Pa', name: 'プロトアクチニウム', hint: '非常に珍しい放射性元素。', desc: '非常に珍しい放射性元素。', period: 9, group: 6 },
+      { id: 92, symbol: 'U', name: 'ウラン', hint: '原子力発電の燃料として使われる重い金属。', desc: '原子力発電の燃料として使われる重い金属。', period: 9, group: 7 },
+      { id: 93, symbol: 'Np', name: 'ネプツニウム', hint: '原子炉の中で作られる人工元素。', desc: 'ウラン燃料から作られる人工元素。', period: 9, group: 8 },
+      { id: 94, symbol: 'Pu', name: 'プルトニウム', hint: 'ウランから作られる人工的な元素。', desc: 'ウランから作られる人工的な元素。', period: 9, group: 9 },
+      { id: 95, symbol: 'Am', name: 'アメリシウム', hint: '海外の火災報知器（煙感知器）に使われている。', desc: '一部の火災報知器（煙感知器）に使われている。', period: 9, group: 10 },
+      { id: 96, symbol: 'Cm', name: 'キュリウム', hint: '火星探査機のX線分析装置などに使われる。', desc: '火星探査機などのアルファ線源。', period: 9, group: 11 },
+      { id: 97, symbol: 'Bk', name: 'バークリウム', hint: '研究用にのみ作られる人工元素。', desc: '研究用にのみ作られる人工元素。', period: 9, group: 12 },
+      { id: 98, symbol: 'Cf', name: 'カリホルニウム', hint: '強力な中性子源。地下の水分計などに。', desc: '強力な中性子源として利用される。', period: 9, group: 13 },
+      { id: 99, symbol: 'Es', name: 'アインスタイニウム', hint: 'アインシュタインにちなんだ人工元素。', desc: 'アインシュタインの名前にちなむ人工元素。', period: 9, group: 14 },
+      { id: 100, symbol: 'Fm', name: 'フェルミウム', hint: 'フェルミにちなんだ人工元素。', desc: 'エンリコ・フェルミの名前にちなむ。', period: 9, group: 15 },
+      { id: 101, symbol: 'Md', name: 'メンデレビウム', hint: '周期表を作ったメンデレーエフにちなむ。', desc: 'メンデレーエフの名前にちなむ。', period: 9, group: 16 },
+      { id: 102, symbol: 'No', name: 'ノーベリウム', hint: 'ノーベルにちなんだ人工元素。', desc: 'アルフレッド・ノーベルの名前にちなむ。', period: 9, group: 17 },
+      { id: 103, symbol: 'Lr', name: 'ローレンシウム', hint: 'サイクロトロンの発明者ローレンスにちなむ。', desc: 'アーネスト・ローレンスの名前にちなむ。', period: 9, group: 18 },
+      { id: 104, symbol: 'Rf', name: 'ラザホージウム', hint: '超重元素。すぐに崩壊する。', desc: '超重元素。すぐに崩壊する。', period: 7, group: 4 },
+      { id: 105, symbol: 'Db', name: 'ドブニウム', hint: 'ロシアのドゥブナ研究所にちなむ。', desc: 'ロシアの研究所のある地名にちなむ。', period: 7, group: 5 },
+      { id: 106, symbol: 'Sg', name: 'シーボーギウム', hint: 'シーボーグにちなむ。', desc: 'シーボーグの名前にちなむ。', period: 7, group: 6 },
+      { id: 107, symbol: 'Bh', name: 'ボーリウム', hint: 'ニールス・ボーアにちなむ。', desc: 'ニールス・ボーアの名前にちなむ。', period: 7, group: 7 },
+      { id: 108, symbol: 'Hs', name: 'ハッシウム', hint: 'ドイツのヘッセン州にちなむ。', desc: 'ドイツのヘッセン州のラテン語名にちなむ。', period: 7, group: 8 },
+      { id: 109, symbol: 'Mt', name: 'マイトネリウム', hint: 'リーゼ・マイトナーにちなむ。', desc: 'リーゼ・マイトナーの名前にちなむ。', period: 7, group: 9 },
+      { id: 110, symbol: 'Ds', name: 'ダームスタチウム', hint: 'ドイツのダルムシュタットにちなむ。', desc: 'ドイツのダルムシュタットにちなむ。', period: 7, group: 10 },
+      { id: 111, symbol: 'Rg', name: 'レントゲニウム', hint: 'レントゲンにちなむ。', desc: 'レントゲンの名前にちなむ。', period: 7, group: 11 },
+      { id: 112, symbol: 'Cn', name: 'コペルニシウム', hint: 'コペルニクスにちなむ。', desc: 'コペルニクスの名前にちなむ。', period: 7, group: 12 },
+      { id: 113, symbol: 'Nh', name: 'ニホニウム', hint: '日本（理化学研究所）で発見された元素。', desc: '日本（理研）で合成・発見された元素。', period: 7, group: 13 },
+      { id: 114, symbol: 'Fl', name: 'フレロビウム', hint: 'ロシアのフレロフ核反応研究所にちなむ。', desc: 'ロシアの研究所にちなむ。', period: 7, group: 14 },
+      { id: 115, symbol: 'Mc', name: 'モスコビウム', hint: 'モスクワにちなむ。', desc: 'モスクワにちなむ。', period: 7, group: 15 },
+      { id: 116, symbol: 'Lv', name: 'リバモリウム', hint: 'アメリカのローレンス・リバモア国立研究所にちなむ。', desc: 'アメリカの研究所にちなむ。', period: 7, group: 16 },
+      { id: 117, symbol: 'Ts', name: 'テネシン', hint: 'アメリカのテネシー州にちなむ。', desc: 'アメリカのテネシー州にちなむ。', period: 7, group: 17 },
+      { id: 118, symbol: 'Og', name: 'オガネソン', hint: 'ロシアのオガネシアンにちなむ、最後の元素。', desc: 'ロシアの物理学者オガネシアンにちなむ。現在知られる中で最も原子番号が大きい。', period: 7, group: 18 }
+    ];
+
+    // --- State Management ---
+    const State = {
+      view: 'home',
+      course: 'basic',
+      format: 'choice',
+      customElements: [],
+      questions: [],
+      qIndex: 0,
+      score: 0,
+      mistakes: [],
+      startTime: null,
+      stats: {},
+      periodicFlips: {}, // id -> 0(front), 1(symbol), 2(hint)
+      battle: {
+        state: 'ready',
+        scores: { p1: 0, p2: 0 },
+        answers: { p1: null, p2: null },
+        currentQ: null,
+        intervalId: null
+      }
+    };
+
+    // 初期化 (LocalStorage 読み込みなど)
+    function init() {
+      // 中級デフォルト
+      State.customElements = ELEMENTS_DATA.filter(el => el.id >= 21 && el.id <= 38).map(el => el.id);
+      
+      const savedStats = localStorage.getItem('elementMasterStats');
+      if (savedStats) {
+        try { State.stats = JSON.parse(savedStats); } catch(e){}
+      }
+      
+      // Dayカウント処理
+      let loginDays = 1;
+      const lastLoginStr = localStorage.getItem('elementMasterLastLogin');
+      const loginDaysStr = localStorage.getItem('elementMasterLoginDays');
+      const todayStr = new Date().toDateString();
+
+      if (loginDaysStr) {
+        loginDays = parseInt(loginDaysStr, 10);
+      }
+      if (lastLoginStr !== todayStr) {
+        if (lastLoginStr) loginDays++; // 初回でなければカウントアップ
+        localStorage.setItem('elementMasterLastLogin', todayStr);
+        localStorage.setItem('elementMasterLoginDays', loginDays);
+      }
+      document.getElementById('day-count-badge').innerText = `Day ${loginDays}`;
+
+      updateHomeUI();
+      renderSettingsCheckboxes();
+      lucide.createIcons();
+    }
+
+    // --- Utils ---
+    const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ja-JP';
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playSound(type) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.frequency.setValueAtTime(1046.5, ctx.currentTime + 0.1);
+          gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.5);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+        }
+      } catch (e) {
+        console.error('Audio play failed', e);
+      }
+    }
+
+    function recordSuccess(id) {
+      State.stats[id] = (State.stats[id] || 0) + 1;
+      localStorage.setItem('elementMasterStats', JSON.stringify(State.stats));
+    }
+
+    // --- Navigation & UI Updates ---
+    function switchView(viewName) {
+      State.view = viewName;
+      document.getElementById('view-home').classList.add('hidden');
+      document.getElementById('view-game').classList.add('hidden');
+      document.getElementById('view-battle').classList.add('hidden');
+      document.getElementById('view-result').classList.add('hidden');
+      document.getElementById(`view-${viewName}`).classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function goHome() {
+      if(State.battle.intervalId) clearInterval(State.battle.intervalId);
+      switchView('home');
+    }
+
+    function setCourse(course) {
+      State.course = course;
+      updateHomeUI();
+    }
+
+    function setFormat(format) {
+      State.format = format;
+      updateHomeUI();
+    }
+
+    function updateHomeUI() {
+      // コースボタン更新
+      document.querySelectorAll('.course-btn').forEach(btn => {
+        btn.className = "course-btn relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden border-slate-200 hover:border-slate-400 bg-slate-50";
+      });
+      document.getElementById(`btn-course-${State.course}`).className = "course-btn relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden border-slate-800 bg-white shadow-md ring-2 ring-slate-200 ring-offset-1";
+
+      // フォーマットボタン更新
+      document.querySelectorAll('.format-btn').forEach(btn => {
+        btn.className = "format-btn flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all text-center border-slate-200 text-slate-600 hover:bg-white";
+      });
+      document.getElementById(`btn-format-${State.format}`).className = "format-btn flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all text-center border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md";
+
+      // 依存UIの表示/非表示
+      if (State.course === 'intermediate') {
+        document.getElementById('settings-area').classList.remove('hidden');
+      } else {
+        document.getElementById('settings-area').classList.add('hidden');
+      }
+
+      if (State.course === 'battle') {
+        document.getElementById('format-section').classList.add('hidden');
+        document.getElementById('start-text').innerText = "対戦をはじめる";
+        document.getElementById('start-icon').setAttribute('data-lucide', 'swords');
+      } else {
+        document.getElementById('format-section').classList.remove('hidden');
+        document.getElementById('start-text').innerText = "5問クイズをはじめる";
+        document.getElementById('start-icon').setAttribute('data-lucide', 'play');
+      }
+      document.getElementById('custom-count').innerText = State.customElements.length;
+      lucide.createIcons();
+    }
+
+    // --- Settings Modal ---
+    function openSettingsModal() {
+      document.getElementById('modal-settings').classList.remove('hidden');
+      renderSettingsCheckboxes();
+    }
+    function closeSettingsModal() {
+      document.getElementById('modal-settings').classList.add('hidden');
+      updateHomeUI();
+    }
+    function toggleCustomElement(id) {
+      const idx = State.customElements.indexOf(id);
+      if (idx > -1) State.customElements.splice(idx, 1);
+      else State.customElements.push(id);
+      renderSettingsCheckboxes();
+    }
+    function selectAllCustom() {
+      State.customElements = ELEMENTS_DATA.filter(el => el.id >= 21).map(el => el.id);
+      renderSettingsCheckboxes();
+    }
+    function clearAllCustom() {
+      State.customElements = [];
+      renderSettingsCheckboxes();
+    }
+    function renderSettingsCheckboxes() {
+      const container = document.getElementById('settings-checkboxes');
+      let html = '';
+      ELEMENTS_DATA.filter(el => el.id >= 21).forEach(el => {
+        const isChecked = State.customElements.includes(el.id);
+        const activeClass = isChecked ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:bg-slate-50';
+        html += `
+          <label class="flex items-center gap-2 p-2 border rounded-xl cursor-pointer select-none transition-colors ${activeClass}">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCustomElement(${el.id})" class="w-4 h-4 text-blue-600 rounded">
+            <span class="font-bold">${el.symbol}</span> <span class="text-xs text-slate-500">${el.name}</span>
+          </label>
+        `;
+      });
+      container.innerHTML = html;
+      document.getElementById('custom-count').innerText = State.customElements.length;
+    }
+
+    // --- Core Game Logic ---
+    function startGame() {
+      if (State.course === 'battle') {
+        startBattle();
+        return;
+      }
+
+      let targetElements = [];
+      if (State.course === 'basic') {
+        targetElements = ELEMENTS_DATA.filter(el => el.id >= 1 && el.id <= 20);
+      } else {
+        targetElements = ELEMENTS_DATA.filter(el => State.customElements.includes(el.id));
+        if (targetElements.length === 0) {
+          alert("学習する元素を1つ以上選んでください。");
+          return;
+        }
+      }
+
+      let generatedQuestions = [];
+      targetElements.forEach(el => {
+        const variations = [];
+        if (State.course === 'basic') {
+          variations.push({ el, type: 'guess_sym_from_pos', q: `図の「？」の位置にある元素の記号は？`, aText: el.symbol, isPos: true });
+          variations.push({ el, type: 'guess_name_from_pos', q: `図の「？」の位置にある元素の名前は？`, aText: el.name, isPos: true });
+          variations.push({ el, type: 'sym_from_name', q: `${el.name} の元素記号は？`, aText: el.symbol });
+          variations.push({ el, type: 'name_from_sym', q: `元素記号 ${el.symbol} の名前は？`, aText: el.name });
+        } else {
+          variations.push({ el, type: 'sym_from_name', q: `${el.name} の元素記号は？`, aText: el.symbol });
+          variations.push({ el, type: 'name_from_sym', q: `元素記号 ${el.symbol} の名前は？`, aText: el.name });
+        }
+        generatedQuestions.push(shuffleArray(variations)[0]);
+      });
+
+      generatedQuestions = shuffleArray(generatedQuestions).slice(0, 5);
+
+      if (State.format === 'choice') {
+        generatedQuestions = generatedQuestions.map(q => {
+          let pool = [];
+          const isAnswerSymbol = q.type === 'guess_sym_from_pos' || q.type === 'sym_from_name';
+          if (isAnswerSymbol) pool = ELEMENTS_DATA.map(e => e.symbol);
+          else pool = ELEMENTS_DATA.map(e => e.name);
+          
+          pool = pool.filter(item => item !== q.aText);
+          const dummies = shuffleArray([...new Set(pool)]).slice(0, 3);
+          return { ...q, choices: shuffleArray([q.aText, ...dummies]) };
+        });
+      }
+
+      State.questions = generatedQuestions;
+      State.qIndex = 0;
+      State.score = 0;
+      State.mistakes = [];
+      State.startTime = Date.now();
+      switchView('game');
+      renderGameQuestion();
+    }
+
+    function renderGameQuestion() {
+      const q = State.questions[State.qIndex];
+      const total = State.questions.length;
+      
+      // Header
+      document.getElementById('game-q-num').innerText = State.qIndex + 1;
+      let progressHtml = '';
+      for(let i=0; i<total; i++){
+        let cls = i < State.qIndex ? 'bg-blue-500' : i === State.qIndex ? 'bg-blue-300 animate-pulse' : 'bg-slate-200';
+        progressHtml += `<div class="h-2 w-8 rounded-full ${cls}"></div>`;
+      }
+      document.getElementById('game-progress').innerHTML = progressHtml;
+
+      // Question Area
+      const miniPeriodic = document.getElementById('game-mini-periodic');
+      if (q.isPos) {
+        miniPeriodic.classList.remove('hidden');
+        miniPeriodic.innerHTML = generateMiniPeriodicHTML(q.el.id);
+      } else {
+        miniPeriodic.classList.add('hidden');
+      }
+      
+      const qText = document.getElementById('game-question-text');
+      qText.innerText = q.q;
+      qText.className = `font-black text-slate-800 leading-tight mt-4 ${q.isPos ? 'text-xl' : 'text-3xl'}`;
+
+      // Hint
+      const hintArea = document.getElementById('game-hint-area');
+      const btnHint = document.getElementById('btn-show-hint');
+      const hintText = document.getElementById('hint-text');
+      if (q.el.hint) {
+        hintArea.classList.remove('hidden');
+        btnHint.classList.remove('hidden');
+        hintText.classList.add('hidden');
+        hintText.innerText = `💡 ${q.el.hint}`;
+      } else {
+        hintArea.classList.add('hidden');
+      }
+
+      // Input Area
+      const inputArea = document.getElementById('game-input-area');
+      document.getElementById('game-feedback-area').classList.add('hidden');
+      inputArea.classList.remove('hidden');
+      
+      if (State.format === 'choice') {
+        let choicesHtml = '<div class="grid grid-cols-2 gap-3">';
+        q.choices.forEach(c => {
+          choicesHtml += `<button onclick="handleAnswer('${c}')" class="py-5 px-2 text-xl font-black bg-white border-2 border-slate-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-sm active:scale-95">${c}</button>`;
+        });
+        choicesHtml += '</div>';
+        inputArea.innerHTML = choicesHtml;
+      } 
+      else if (State.format === 'typing') {
+        inputArea.innerHTML = `
+          <form onsubmit="event.preventDefault(); handleAnswer(document.getElementById('typing-input').value)" class="flex flex-col gap-3">
+            <input type="text" id="typing-input" autofocus placeholder="答えを入力してEnter" class="w-full text-center text-3xl p-4 font-bold border-2 border-slate-300 rounded-2xl focus:border-blue-500 focus:outline-none" autocomplete="off">
+            <div class="flex gap-2">
+              <button type="button" onclick="handleAnswer('', false)" class="flex-1 py-4 bg-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-300 active:scale-95 transition-transform">わからない</button>
+              <button type="submit" class="flex-[2] py-4 bg-slate-800 text-white font-bold rounded-2xl active:scale-95 transition-transform">回答する</button>
+            </div>
+          </form>
+        `;
+        setTimeout(() => document.getElementById('typing-input').focus(), 50);
+      }
+      else if (State.format === 'flashcard') {
+        inputArea.innerHTML = `
+          <div class="flex flex-col gap-6" id="flashcard-front">
+            <button onclick="flipFlashcard()" class="w-full py-8 text-xl font-bold text-slate-500 bg-slate-100 border-2 border-dashed border-slate-300 rounded-3xl hover:bg-slate-200">タップして答えを見る</button>
+          </div>
+          <div class="hidden animate-in fade-in" id="flashcard-back">
+            <div class="text-center mb-6">
+              <div class="text-sm text-slate-500 mb-1">正解は...</div>
+              <div class="text-5xl font-black text-blue-600 bg-blue-50 py-6 rounded-3xl border border-blue-100">${q.aText}</div>
+            </div>
+            <div class="flex gap-3">
+              <button onclick="handleAnswer('', false)" class="flex-1 py-4 bg-rose-100 text-rose-700 font-bold rounded-2xl hover:bg-rose-200 flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                <i data-lucide="x" class="w-6 h-6"></i> 思い出せなかった
+              </button>
+              <button onclick="handleAnswer('', true)" class="flex-1 py-4 bg-emerald-100 text-emerald-700 font-bold rounded-2xl hover:bg-emerald-200 flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                <i data-lucide="check" class="w-6 h-6"></i> 完璧に覚えた！
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    function generateMiniPeriodicHTML(highlightId) {
+      let html = `<div class="grid grid-cols-[repeat(18,minmax(0,1fr))] gap-0.5" style="width: 100%; max-width: 300px;">`;
+      for(let r=1; r<=4; r++) {
+        for(let c=1; c<=18; c++) {
+          if(r===4 && c>2) continue;
+          const el = ELEMENTS_DATA.find(e => e.period === r && e.group === c && e.id <= 20);
+          let cls = 'bg-white border border-slate-300 text-slate-400';
+          let txt = '';
+          if (el) {
+            if (el.id === highlightId) {
+              cls = 'bg-rose-500 text-white animate-pulse shadow-lg ring-2 ring-rose-300 z-10';
+              txt = '?';
+            } else {
+              txt = el.id;
+            }
+          } else if(r<4) {
+            cls = ''; // 空白セル
+          }
+          html += `<div class="aspect-square rounded-[2px] flex items-center justify-center text-[10px] font-bold ${cls}">${txt}</div>`;
+        }
+      }
+      html += `</div><div class="text-xs font-bold text-slate-400 mt-2 text-center">周期表</div>`;
+      return html;
+    }
+
+    function showHint() {
+      document.getElementById('btn-show-hint').classList.add('hidden');
+      document.getElementById('hint-text').classList.remove('hidden');
+    }
+
+    function flipFlashcard() {
+      document.getElementById('flashcard-front').classList.add('hidden');
+      document.getElementById('flashcard-back').classList.remove('hidden');
+    }
+
+    function handleAnswer(userAnswer, forceCorrect = null) {
+      const q = State.questions[State.qIndex];
+      const isLast = State.qIndex === State.questions.length - 1;
+      let correct = false;
+
+      if (forceCorrect !== null) {
+        correct = forceCorrect;
+      } else if (userAnswer) {
+        correct = userAnswer.toString().toLowerCase() === q.aText.toString().toLowerCase();
+      }
+
+      if (State.format !== 'flashcard') {
+        document.getElementById('game-input-area').classList.add('hidden');
+        const feedback = document.getElementById('game-feedback-area');
+        feedback.classList.remove('hidden');
+
+        if (correct) {
+          playSound('correct');
+          State.score++;
+          recordSuccess(q.el.id);
+          feedback.innerHTML = `
+            <div class="p-6 md:p-8 rounded-3xl text-center border-2 shadow-sm animate-in fade-in zoom-in-95 duration-200 bg-emerald-50 border-emerald-200">
+              <div class="flex justify-center mb-3"><i data-lucide="check-circle-2" class="w-14 h-14 text-emerald-500"></i></div>
+              <h3 class="text-3xl md:text-4xl font-black mb-2 text-emerald-600">正解！</h3>
+              <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-6 text-left shadow-sm">
+                <div class="font-black text-xl text-slate-800 mb-2">${q.el.name} (${q.el.symbol})</div>
+                <p class="text-sm md:text-base text-slate-600 leading-relaxed">${q.el.desc}</p>
+              </div>
+              <button onclick="nextQuestion()" class="w-full py-4 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center gap-2 transition-transform shadow-md text-lg">
+                ${isLast ? '結果を見る' : '次の問題へ'} <i data-lucide="arrow-right" class="w-5 h-5"></i>
+              </button>
+            </div>`;
+        } else {
+          playSound('wrong');
+          State.mistakes.push(q);
+          feedback.innerHTML = `
+            <div class="p-6 md:p-8 rounded-3xl text-center border-2 shadow-sm animate-in fade-in zoom-in-95 duration-200 bg-rose-50 border-rose-200">
+              <div class="flex justify-center mb-3"><i data-lucide="x" class="w-14 h-14 text-rose-500"></i></div>
+              <h3 class="text-3xl md:text-4xl font-black mb-2 text-rose-600">残念...</h3>
+              <div class="text-lg md:text-xl font-bold text-slate-700 mb-6">正解は 「${q.aText}」 でした</div>
+              <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-6 text-left shadow-sm">
+                <div class="font-black text-xl text-slate-800 mb-2">${q.el.name} (${q.el.symbol})</div>
+                <p class="text-sm md:text-base text-slate-600 leading-relaxed">${q.el.desc}</p>
+              </div>
+              <button onclick="nextQuestion()" class="w-full py-4 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center gap-2 transition-transform shadow-md text-lg">
+                ${isLast ? '結果を見る' : '次の問題へ'} <i data-lucide="arrow-right" class="w-5 h-5"></i>
+              </button>
+            </div>`;
+        }
+        lucide.createIcons();
+      } else {
+        // Flashcard mode skips feedback
+        if (correct) State.score++;
+        else State.mistakes.push(q);
+        nextQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (State.qIndex >= State.questions.length - 1) {
+        finishGame();
+      } else {
+        State.qIndex++;
+        renderGameQuestion();
+      }
+    }
+
+    function finishGame() {
+      State.elapsedTime = Math.floor((Date.now() - State.startTime) / 1000);
+      document.getElementById('result-score').innerText = State.score;
+      document.getElementById('result-time').innerText = State.elapsedTime;
+
+      const mistakesArea = document.getElementById('mistakes-area');
+      const mistakesList = document.getElementById('mistakes-list');
+      if (State.mistakes.length > 0) {
+        mistakesArea.classList.remove('hidden');
+        let mHtml = '';
+        State.mistakes.forEach(m => {
+          mHtml += `
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 flex items-start gap-4">
+              <div class="bg-rose-50 text-rose-600 font-black text-xl w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-rose-100">${m.el.symbol}</div>
+              <div>
+                <div class="font-bold text-slate-800">${m.el.name}</div>
+                <div class="text-xs text-slate-500 mt-1">${m.el.desc}</div>
+              </div>
+            </div>`;
+        });
+        mistakesList.innerHTML = mHtml;
+      } else {
+        mistakesArea.classList.add('hidden');
+      }
+      switchView('result');
+    }
+
+    // --- Battle Mode Logic ---
+    function startBattle() {
+      switchView('battle');
+      State.battle.scores = { p1: 0, p2: 0 };
+      document.getElementById('battle-finish-overlay').classList.add('hidden');
+      updateBattleScores();
+      setBattleState('ready');
+    }
+
+    function updateBattleScores() {
+      document.getElementById('battle-p1-score').innerText = State.battle.scores.p1;
+      document.getElementById('battle-p2-score').innerText = State.battle.scores.p2;
+    }
+
+    function setBattleState(state) {
+      State.battle.state = state;
+      const centerTxt = document.getElementById('battle-center-text');
+      if (state === 'ready') {
+        centerTxt.innerText = 'Ready...';
+        centerTxt.className = "text-3xl font-black text-yellow-400 min-h-[40px]";
+        document.getElementById('battle-p1-area').innerHTML = '';
+        document.getElementById('battle-p2-area').innerHTML = '';
+        setTimeout(() => { 
+          centerTxt.innerText = ''; 
+          generateBattleQuestion(); 
+        }, 1500);
+      } else if (state === 'playing') {
+        renderBattleChoices();
+      }
+    }
+
+    function generateBattleQuestion() {
+      const targetIds = Array.from(new Set([ ...Array.from({length: 20}, (_, i) => i + 1), ...State.customElements ]));
+      const battleElements = ELEMENTS_DATA.filter(e => targetIds.includes(e.id));
+      
+      const el = battleElements[Math.floor(Math.random() * battleElements.length)];
+      const isSymbol = Math.random() > 0.5;
+      const q = isSymbol ? `${el.name} の記号は？` : `記号 ${el.symbol} の名前は？`;
+      const aText = isSymbol ? el.symbol : el.name;
+      
+      let pool = isSymbol ? ELEMENTS_DATA.map(e => e.symbol) : ELEMENTS_DATA.map(e => e.name);
+      pool = pool.filter(item => item !== aText);
+      const dummies = shuffleArray([...new Set(pool)]).slice(0, 3);
+      const choices = shuffleArray([aText, ...dummies]);
+
+      State.battle.currentQ = { q, aText, choices, el };
+      State.battle.answers = { p1: null, p2: null };
+      setBattleState('playing');
+
+      // Typing animation
+      if (State.battle.intervalId) clearInterval(State.battle.intervalId);
+      let i = 0;
+      const text = State.battle.currentQ.q;
+      const centerTxt = document.getElementById('battle-center-text');
+      centerTxt.className = "text-2xl md:text-3xl font-black text-white min-h-[40px]";
+      centerTxt.innerText = '';
+      
+      State.battle.intervalId = setInterval(() => {
+        centerTxt.innerText = text.slice(0, i + 1);
+        i++;
+        if (i >= text.length) clearInterval(State.battle.intervalId);
+      }, 85); // 85ms per char
+    }
+
+    function renderBattleChoices() {
+      ['p1', 'p2'].forEach(player => {
+        const area = document.getElementById(`battle-${player}-area`);
+        const q = State.battle.currentQ;
+        if (!q) { area.innerHTML = ''; return; }
+
+        let html = '<div class="grid grid-cols-2 gap-2 w-full">';
+        const myAnswer = State.battle.answers[player];
+        const oppAnswer = State.battle.answers[player === 'p1' ? 'p2' : 'p1'];
+        const someoneCorrect = State.battle.answers.p1?.isCorrect || State.battle.answers.p2?.isCorrect;
+
+        q.choices.forEach(c => {
+          let btnClass = "py-6 bg-white text-slate-800 font-black text-xl rounded-2xl active:scale-95 transition-transform shadow-md";
+          const isSelected = myAnswer && myAnswer.choice === c;
+
+          if (someoneCorrect) {
+             if (c === q.aText) btnClass = "py-6 bg-emerald-500 text-white font-black text-xl rounded-2xl border-4 border-emerald-300 shadow-lg scale-105 transition-all";
+             else btnClass = "py-6 bg-slate-100 text-slate-300 font-black text-xl rounded-2xl opacity-50";
+          } else if (myAnswer) {
+             if (isSelected) btnClass = "py-6 bg-slate-600 text-slate-400 font-black text-xl rounded-2xl opacity-50";
+             else btnClass = "py-6 bg-slate-100 text-slate-400 font-black text-xl rounded-2xl opacity-50";
+          } else if (oppAnswer && oppAnswer.isCorrect === false) {
+             btnClass = "py-6 bg-white text-slate-800 font-black text-xl rounded-2xl active:scale-95 transition-transform shadow-md border-2 border-blue-200";
+          }
+          
+          const disabledAttr = (myAnswer || someoneCorrect) ? 'disabled' : '';
+          // 画面に描画されるため文字列で関数を渡す
+          html += `<button ${disabledAttr} onclick="handleBattleAnswer('${player}', '${c}')" class="${btnClass}">${c}</button>`;
+        });
+        html += '</div>';
+        
+        if (!myAnswer && !someoneCorrect && oppAnswer && oppAnswer.isCorrect === false) {
+           html = `<div class="text-white font-bold opacity-80 mb-2">相手が間違えました！チャンス！</div>` + html;
+        }
+
+        area.innerHTML = html;
+      });
+    }
+
+    function handleBattleAnswer(player, choice) {
+      if (State.battle.state !== 'playing' || State.battle.answers[player] || 
+          State.battle.answers.p1?.isCorrect || State.battle.answers.p2?.isCorrect) return;
+
+      const isCorrect = choice === State.battle.currentQ.aText;
+      State.battle.answers[player] = { choice, isCorrect };
+
+      if (isCorrect) {
+        playSound('correct');
+        State.battle.scores[player]++;
+        updateBattleScores();
+        renderBattleChoices(); // update colors
+        if (State.battle.intervalId) clearInterval(State.battle.intervalId); // stop typing
+        document.getElementById('battle-center-text').innerText = State.battle.currentQ.q; // complete text
+
+        if (State.battle.scores.p1 >= 5 || State.battle.scores.p2 >= 5) {
+          setTimeout(() => finishBattle(), 1800);
+        } else {
+          setTimeout(() => generateBattleQuestion(), 1800);
+        }
+      } else {
+        playSound('wrong');
+        renderBattleChoices();
+        const opp = player === 'p1' ? 'p2' : 'p1';
+        if (State.battle.answers[opp] && State.battle.answers[opp].isCorrect === false) {
+          // 両方間違え
+          setTimeout(() => generateBattleQuestion(), 1500);
+        }
+      }
+    }
+
+    function finishBattle() {
+      State.battle.state = 'finished';
+      const winner = State.battle.scores.p1 >= 5 ? 'Player 1 (上)' : 'Player 2 (下)';
+      document.getElementById('battle-finish-overlay').classList.remove('hidden');
+      document.getElementById('battle-winner-text').innerText = `${winner} の勝利！`;
+      document.getElementById('battle-final-score').innerText = `${State.battle.scores.p1} - ${State.battle.scores.p2}`;
+    }
+
+    // --- Periodic Table Logic ---
+    function openPeriodicModal() {
+      document.getElementById('modal-periodic').classList.remove('hidden');
+      renderPeriodicTable();
+    }
+    
+    function closePeriodicModal() {
+      document.getElementById('modal-periodic').classList.add('hidden');
+    }
+
+    function getRankData(count) {
+      if (!count || count === 0) return { bg: 'bg-slate-200 border-slate-300 text-slate-500', crown: null };
+      if (count <= 2) return { bg: 'bg-sky-200 border-sky-300 text-sky-900', crown: null };
+      if (count <= 4) return { bg: 'bg-blue-500 border-blue-600 text-white', crown: null };
+      if (count <= 9) return { bg: 'bg-purple-500 border-purple-600 text-white', crown: null };
+      if (count <= 15) return { bg: 'bg-purple-600 border-purple-700 text-white shadow-inner', crown: 'text-orange-400' };
+      if (count <= 20) return { bg: 'bg-purple-700 border-purple-800 text-white shadow-inner', crown: 'text-slate-300' };
+      return { bg: 'bg-purple-800 border-purple-900 text-yellow-300 shadow-inner ring-2 ring-yellow-400', crown: 'text-yellow-400' };
+    }
+
+    function handleCardFlip(id) {
+      const el = ELEMENTS_DATA.find(e => e.id === id);
+      const currentState = State.periodicFlips[id] || 0;
+      let nextState = 0;
+
+      if (currentState === 0) {
+        // 0 -> 1 : Audio + Symbol/Name
+        const spell = el.symbol.toUpperCase().split('').join(' ');
+        speakText(`${spell}、${el.name}`);
+        nextState = 1;
+      } else if (currentState === 1) {
+        // 1 -> 2 : Hint
+        nextState = 2;
+      } else {
+        // 2 -> 0 : Reset
+        nextState = 0;
+      }
+
+      State.periodicFlips[id] = nextState;
+      renderCardContents(id, el);
+    }
+
+    function renderCardContents(id, el) {
+      const count = State.stats[id] || 0;
+      const rank = getRankData(count);
+      const state = State.periodicFlips[id] || 0;
+      const isFlipped = state > 0;
+      
+      const container = document.getElementById(`periodic-card-${id}`);
+      if (!container) return;
+
+      const innerDiv = container.querySelector('.transform-3d');
+      if (isFlipped) innerDiv.classList.add('rotate-y-180');
+      else innerDiv.classList.remove('rotate-y-180');
+
+      // Update back content dynamically
+      const backDiv = innerDiv.querySelector('.rotate-y-180');
+      if (state === 1) {
+        backDiv.innerHTML = `
+          <span class="absolute top-0 md:top-0.5 left-0.5 md:left-1 text-[6px] md:text-[8px] text-slate-400 font-bold">${el.id}</span>
+          <span class="font-black text-indigo-700 leading-none ${el.symbol.length > 1 ? 'text-[10px] md:text-lg' : 'text-xs md:text-2xl'}">${el.symbol}</span>
+          <span class="text-[6px] md:text-[10px] font-bold text-slate-600 mt-0.5 whitespace-nowrap w-[90%] text-center overflow-hidden text-ellipsis">${el.name}</span>
+        `;
+      } else if (state === 2) {
+        backDiv.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center p-0.5">
+            <span class="text-[5px] md:text-[8px] text-slate-700 font-bold leading-tight text-center break-words">${el.hint}</span>
+          </div>
+        `;
+      }
+    }
+
+    function renderPeriodicTable() {
+      const grid = document.getElementById('periodic-grid');
+      let html = '';
+
+      ELEMENTS_DATA.forEach(el => {
+        let row = el.period;
+        let col = el.group;
+        if (el.period === 9) { row = 8; }
+        
+        const count = State.stats[el.id] || 0;
+        const rank = getRankData(count);
+        // 初期状態は必ず 0(front) にリセット
+        State.periodicFlips[el.id] = 0; 
+        
+        const crownHtml = rank.crown ? `<i data-lucide="crown" class="w-3 h-3 absolute top-0.5 right-0.5 ${rank.crown} drop-shadow-md"></i>` : '';
+        
+        html += `
+          <div style="grid-row: ${row}; grid-column: ${col};" class="w-full aspect-square" id="periodic-card-${el.id}">
+            <div class="w-full h-full perspective-1000 cursor-pointer" onclick="handleCardFlip(${el.id})">
+              <div class="w-full h-full relative transform-3d transition-transform duration-500">
+                <!-- Front -->
+                <div class="absolute w-full h-full backface-hidden rounded-[4px] md:rounded-lg border-2 flex flex-col items-center justify-center shadow-sm ${rank.bg}">
+                  ${crownHtml}
+                  <span class="font-black text-[10px] md:text-xl opacity-90">${el.id}</span>
+                </div>
+                <!-- Back (Initially empty structure) -->
+                <div class="absolute w-full h-full backface-hidden rotate-y-180 rounded-[4px] md:rounded-lg border-2 border-indigo-200 bg-white flex flex-col items-center justify-center shadow-md overflow-hidden p-0.5 md:p-1">
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      grid.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // --- On Load ---
+    window.onload = init;
+  </script>
+</body>
+</html>
