@@ -33,20 +33,20 @@
     <div class="max-w-3xl mx-auto pt-2 md:py-0 md:h-16 flex flex-col justify-center">
       <!-- 上段：ロゴとボタン、PC時は小ネタも -->
       <div class="flex items-center justify-between gap-2 px-4 h-12 md:h-full">
-        <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
-          <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg text-white">
+        <div class="flex items-center gap-2 cursor-pointer min-w-0" onclick="goHome()">
+          <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg text-white shrink-0">
             <i data-lucide="zap" class="w-5 h-5"></i>
           </div>
-          <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 hidden sm:block">
+          <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 hidden sm:block shrink-0 whitespace-nowrap">
             元素マスター
           </h1>
           
           <!-- PC用: Dayバッジと小ネタ -->
-          <div class="hidden md:flex items-center gap-2 ml-2">
+          <div class="hidden md:flex items-center gap-2 ml-2 min-w-0">
             <div class="px-2 py-1 bg-yellow-100 text-yellow-700 font-bold text-sm rounded-full flex items-center gap-1 border border-yellow-200 shadow-sm shrink-0">
               <i data-lucide="flame" class="w-4 h-4 text-orange-500"></i> <span class="day-count-badge">Day 1</span>
             </div>
-            <div class="flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full max-w-md border border-slate-200" title="今日の小ネタ">
+            <div class="flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 shrink min-w-0" title="今日の小ネタ">
               <i data-lucide="lightbulb" class="w-3 h-3 mr-1 text-yellow-500 shrink-0"></i>
               <span class="header-trivia truncate font-medium"></span>
             </div>
@@ -58,11 +58,11 @@
       </div>
       
       <!-- スマホ用: 下段にDayバッジと小ネタを表示 -->
-      <div class="flex md:hidden items-center gap-2 w-full px-4 pb-2">
+      <div class="flex md:hidden items-center gap-2 w-full px-4 pb-2 mt-1">
         <div class="px-2 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs rounded-full flex items-center gap-1 border border-yellow-200 shadow-sm shrink-0">
           <i data-lucide="flame" class="w-3 h-3 text-orange-500"></i> <span class="day-count-badge">Day 1</span>
         </div>
-        <div class="flex items-center text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200 flex-1 min-w-0">
+        <div class="flex items-center text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200 flex-1 min-w-0 overflow-hidden">
           <i data-lucide="lightbulb" class="w-3 h-3 mr-1 text-yellow-500 shrink-0"></i>
           <!-- 横スクロール可能にして全文読めるようにする -->
           <div class="overflow-x-auto whitespace-nowrap hide-scrollbar font-medium w-full">
