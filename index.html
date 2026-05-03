@@ -24,6 +24,18 @@
     /* スクロールバー非表示（スマホの小ネタ横スクロール用） */
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* 結果発表用のド派手なアニメーション */
+    @keyframes tada {
+      0% { transform: scale(1); }
+      10%, 20% { transform: scale(0.9) rotate(-3deg); }
+      30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+      40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    .animate-tada {
+      animation: tada 1.5s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-200 pb-24">
@@ -187,10 +199,34 @@
         <div id="battle-p2-area" class="w-full max-w-sm flex flex-col items-center"></div>
       </div>
       
-      <div id="battle-finish-overlay" class="hidden absolute inset-0 bg-slate-900 flex-col items-center justify-center text-white p-8 z-[70]">
-        <h2 id="battle-winner-text" class="text-4xl font-black text-yellow-400 mb-4"></h2>
-        <div id="battle-final-score" class="text-2xl font-bold mb-8"></div>
-        <button onclick="goHome()" class="py-4 px-8 bg-blue-600 rounded-full font-bold text-xl hover:bg-blue-500">ホームに戻る</button>
+      <!-- 対戦決着画面 (派手なアニメーション付き) -->
+      <div id="battle-finish-overlay" class="hidden absolute inset-0 z-[70] overflow-hidden bg-slate-900">
+        <!-- 動的背景 (グロー効果) -->
+        <div id="battle-finish-glow" class="absolute inset-0 opacity-60 mix-blend-screen transition-all duration-1000"></div>
+        
+        <!-- コンテンツ -->
+        <div class="relative z-10 flex flex-col items-center justify-center w-full h-full animate-in zoom-in-50 duration-500">
+          <div class="mb-4">
+            <i data-lucide="crown" id="battle-winner-icon" class="w-32 h-32 md:w-40 md:h-40 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]"></i>
+          </div>
+          <h2 id="battle-winner-text" class="text-6xl md:text-8xl font-black mb-8 drop-shadow-2xl tracking-widest text-center animate-tada"></h2>
+          
+          <div class="flex items-center gap-8 md:gap-12 mb-12 bg-black/40 px-10 py-6 rounded-[3rem] backdrop-blur-md border border-white/20 shadow-2xl">
+            <div class="text-center">
+              <div class="text-xl text-rose-300 font-bold mb-1">赤</div>
+              <div id="battle-score-p1" class="text-5xl md:text-7xl font-black text-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]">0</div>
+            </div>
+            <div class="text-4xl md:text-5xl text-slate-500 font-black">-</div>
+            <div class="text-center">
+              <div class="text-xl text-blue-300 font-bold mb-1">青</div>
+              <div id="battle-score-p2" class="text-5xl md:text-7xl font-black text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]">0</div>
+            </div>
+          </div>
+          
+          <button onclick="goHome()" class="py-4 px-12 bg-white text-slate-900 rounded-full font-black text-xl hover:scale-110 active:scale-95 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.6)]">
+            ホームに戻る
+          </button>
+        </div>
       </div>
     </div>
 
@@ -525,6 +561,8 @@
 
     function goHome() {
       if(State.battle.intervalId) clearInterval(State.battle.intervalId);
+      document.getElementById('battle-finish-overlay').classList.add('hidden');
+      document.getElementById('battle-finish-overlay').classList.remove('flex');
       switchView('home');
     }
 
@@ -897,7 +935,11 @@
     function startBattle() {
       switchView('battle');
       State.battle.scores = { p1: 0, p2: 0 };
-      document.getElementById('battle-finish-overlay').classList.add('hidden');
+      
+      const overlay = document.getElementById('battle-finish-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      
       updateBattleScores();
       setBattleState('ready');
     }
@@ -1089,10 +1131,43 @@
 
     function finishBattle() {
       State.battle.state = 'finished';
-      const winner = State.battle.scores.p1 >= 5 ? 'Player 1 (上)' : 'Player 2 (下)';
-      document.getElementById('battle-finish-overlay').classList.remove('hidden');
-      document.getElementById('battle-winner-text').innerText = `${winner} の勝利！`;
-      document.getElementById('battle-final-score').innerText = `${State.battle.scores.p1} - ${State.battle.scores.p2}`;
+      const isP1Winner = State.battle.scores.p1 >= 5;
+      
+      const overlay = document.getElementById('battle-finish-overlay');
+      const glow = document.getElementById('battle-finish-glow');
+      const winnerText = document.getElementById('battle-winner-text');
+      const winnerIcon = document.getElementById('battle-winner-icon');
+      const scoreP1 = document.getElementById('battle-score-p1');
+      const scoreP2 = document.getElementById('battle-score-p2');
+
+      scoreP1.innerText = State.battle.scores.p1;
+      scoreP2.innerText = State.battle.scores.p2;
+
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+
+      setTimeout(() => {
+        if (isP1Winner) {
+          glow.style.background = "radial-gradient(circle, rgba(225,29,72,0.8) 0%, transparent 80%)";
+          winnerText.innerHTML = `<span class="text-rose-400">赤</span>の勝利！`;
+          winnerIcon.classList.add('text-rose-400');
+          winnerIcon.classList.remove('text-blue-400');
+        } else {
+          glow.style.background = "radial-gradient(circle, rgba(37,99,235,0.8) 0%, transparent 80%)";
+          winnerText.innerHTML = `<span class="text-blue-400">青</span>の勝利！`;
+          winnerIcon.classList.add('text-blue-400');
+          winnerIcon.classList.remove('text-rose-400');
+        }
+        lucide.createIcons();
+      }, 50);
+
+      // ファンファーレ効果音
+      let playCount = 0;
+      const fanInterval = setInterval(() => {
+        playSound('correct');
+        playCount++;
+        if(playCount >= 3) clearInterval(fanInterval);
+      }, 150);
     }
 
     // --- Periodic Table Logic ---
