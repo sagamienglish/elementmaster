@@ -603,12 +603,16 @@
         if (State.course === 'basic') {
           variations.push({ el, type: 'guess_sym_from_pos', q: `図の「？」の位置にある元素の記号は？`, aText: el.symbol, isPos: true });
           variations.push({ el, type: 'guess_name_from_pos', q: `図の「？」の位置にある元素の名前は？`, aText: el.name, isPos: true });
-          variations.push({ el, type: 'sym_from_name', q: `${el.name} の元素記号は？`, aText: el.symbol });
-          variations.push({ el, type: 'name_from_sym', q: `元素記号 ${el.symbol} の名前は？`, aText: el.name });
-        } else {
-          variations.push({ el, type: 'sym_from_name', q: `${el.name} の元素記号は？`, aText: el.symbol });
-          variations.push({ el, type: 'name_from_sym', q: `元素記号 ${el.symbol} の名前は？`, aText: el.name });
         }
+        variations.push({ el, type: 'sym_from_name', q: `${el.name} の元素記号は？`, aText: el.symbol });
+        variations.push({ el, type: 'name_from_sym', q: `元素記号 ${el.symbol} の名前は？`, aText: el.name });
+        
+        // 追加: 使われ方から出題
+        if (el.hint) {
+          variations.push({ el, type: 'sym_from_hint', q: `「${el.hint}」\nこの元素の記号は？`, aText: el.symbol, isHint: true });
+          variations.push({ el, type: 'name_from_hint', q: `「${el.hint}」\nこの元素の名前は？`, aText: el.name, isHint: true });
+        }
+
         generatedQuestions.push(shuffleArray(variations)[0]);
       });
 
@@ -617,7 +621,7 @@
       if (State.format === 'choice') {
         generatedQuestions = generatedQuestions.map(q => {
           let pool = [];
-          const isAnswerSymbol = q.type === 'guess_sym_from_pos' || q.type === 'sym_from_name';
+          const isAnswerSymbol = ['guess_sym_from_pos', 'sym_from_name', 'sym_from_hint'].includes(q.type);
           if (isAnswerSymbol) pool = ELEMENTS_DATA.map(e => e.symbol);
           else pool = ELEMENTS_DATA.map(e => e.name);
           
@@ -659,14 +663,14 @@
       }
       
       const qText = document.getElementById('game-question-text');
-      qText.innerText = q.q;
-      qText.className = `font-black text-slate-800 leading-tight mt-4 ${q.isPos ? 'text-xl' : 'text-3xl'}`;
+      qText.innerHTML = q.q.replace(/\n/g, '<br/>');
+      qText.className = `font-black text-slate-800 leading-tight mt-4 ${q.isPos || q.isHint ? 'text-xl md:text-2xl' : 'text-3xl'}`;
 
-      // Hint
+      // Hint (使われ方の問題の時はヒントボタンを出さない)
       const hintArea = document.getElementById('game-hint-area');
       const btnHint = document.getElementById('btn-show-hint');
       const hintText = document.getElementById('hint-text');
-      if (q.el.hint) {
+      if (q.el.hint && !q.isHint) {
         hintArea.classList.remove('hidden');
         btnHint.classList.remove('hidden');
         hintText.classList.add('hidden');
@@ -780,12 +784,14 @@
           State.score++;
           recordSuccess(q.el.id);
           feedback.innerHTML = `
-            <div class="p-6 md:p-8 rounded-3xl text-center border-2 shadow-sm animate-in fade-in zoom-in-95 duration-200 bg-emerald-50 border-emerald-200">
-              <div class="flex justify-center mb-3"><i data-lucide="check-circle-2" class="w-14 h-14 text-emerald-500"></i></div>
-              <h3 class="text-3xl md:text-4xl font-black mb-2 text-emerald-600">正解！</h3>
-              <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-6 text-left shadow-sm">
-                <div class="font-black text-xl text-slate-800 mb-2">${q.el.name} (${q.el.symbol})</div>
-                <p class="text-sm md:text-base text-slate-600 leading-relaxed">${q.el.desc}</p>
+            <div class="p-4 md:p-6 rounded-3xl text-center border-2 shadow-sm animate-in fade-in zoom-in-95 duration-200 bg-emerald-50 border-emerald-200">
+              <div class="flex items-center justify-center gap-3 mb-4">
+                <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-500"></i>
+                <h3 class="text-3xl md:text-4xl font-black text-emerald-600">正解！</h3>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 mb-4 text-left shadow-sm">
+                <div class="font-black text-xl text-slate-800 mb-1">${q.el.name} (${q.el.symbol})</div>
+                <p class="text-sm md:text-base text-slate-600 leading-snug">${q.el.desc}</p>
               </div>
               <button onclick="nextQuestion()" class="w-full py-4 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center gap-2 transition-transform shadow-md text-lg">
                 ${isLast ? '結果を見る' : '次の問題へ'} <i data-lucide="arrow-right" class="w-5 h-5"></i>
@@ -795,13 +801,15 @@
           playSound('wrong');
           State.mistakes.push(q);
           feedback.innerHTML = `
-            <div class="p-6 md:p-8 rounded-3xl text-center border-2 shadow-sm animate-in fade-in zoom-in-95 duration-200 bg-rose-50 border-rose-200">
-              <div class="flex justify-center mb-3"><i data-lucide="x" class="w-14 h-14 text-rose-500"></i></div>
-              <h3 class="text-3xl md:text-4xl font-black mb-2 text-rose-600">残念...</h3>
-              <div class="text-lg md:text-xl font-bold text-slate-700 mb-6">正解は 「${q.aText}」 でした</div>
-              <div class="bg-white p-5 rounded-2xl border border-slate-200 mb-6 text-left shadow-sm">
-                <div class="font-black text-xl text-slate-800 mb-2">${q.el.name} (${q.el.symbol})</div>
-                <p class="text-sm md:text-base text-slate-600 leading-relaxed">${q.el.desc}</p>
+            <div class="p-4 md:p-6 rounded-3xl text-center border-2 shadow-sm animate-in fade-in zoom-in-95 duration-200 bg-rose-50 border-rose-200">
+              <div class="flex items-center justify-center gap-3 mb-2">
+                <i data-lucide="x" class="w-10 h-10 text-rose-500"></i>
+                <h3 class="text-3xl md:text-4xl font-black text-rose-600">残念...</h3>
+              </div>
+              <div class="text-lg md:text-xl font-bold text-slate-700 mb-4">正解は 「${q.aText}」</div>
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 mb-4 text-left shadow-sm">
+                <div class="font-black text-xl text-slate-800 mb-1">${q.el.name} (${q.el.symbol})</div>
+                <p class="text-sm md:text-base text-slate-600 leading-snug">${q.el.desc}</p>
               </div>
               <button onclick="nextQuestion()" class="w-full py-4 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center gap-2 transition-transform shadow-md text-lg">
                 ${isLast ? '結果を見る' : '次の問題へ'} <i data-lucide="arrow-right" class="w-5 h-5"></i>
@@ -889,11 +897,34 @@
       const battleElements = ELEMENTS_DATA.filter(e => targetIds.includes(e.id));
       
       const el = battleElements[Math.floor(Math.random() * battleElements.length)];
-      const isSymbol = Math.random() > 0.5;
-      const q = isSymbol ? `${el.name} の記号は？` : `記号 ${el.symbol} の名前は？`;
-      const aText = isSymbol ? el.symbol : el.name;
       
-      let pool = isSymbol ? ELEMENTS_DATA.map(e => e.symbol) : ELEMENTS_DATA.map(e => e.name);
+      const patterns = ['sym_from_name', 'name_from_sym'];
+      if (el.hint) {
+         patterns.push('sym_from_hint', 'name_from_hint');
+      }
+      const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
+
+      let q = '';
+      let aText = '';
+      let isAnswerSymbol = false;
+
+      if (selectedPattern === 'sym_from_name') {
+         q = `${el.name} の記号は？`;
+         aText = el.symbol;
+         isAnswerSymbol = true;
+      } else if (selectedPattern === 'name_from_sym') {
+         q = `記号 ${el.symbol} の名前は？`;
+         aText = el.name;
+      } else if (selectedPattern === 'sym_from_hint') {
+         q = `「${el.hint}」の記号は？`;
+         aText = el.symbol;
+         isAnswerSymbol = true;
+      } else if (selectedPattern === 'name_from_hint') {
+         q = `「${el.hint}」の名前は？`;
+         aText = el.name;
+      }
+      
+      let pool = isAnswerSymbol ? ELEMENTS_DATA.map(e => e.symbol) : ELEMENTS_DATA.map(e => e.name);
       pool = pool.filter(item => item !== aText);
       const dummies = shuffleArray([...new Set(pool)]).slice(0, 3);
       const choices = shuffleArray([aText, ...dummies]);
@@ -907,7 +938,8 @@
       let i = 0;
       const text = State.battle.currentQ.q;
       const centerTxt = document.getElementById('battle-center-text');
-      centerTxt.className = "text-2xl md:text-3xl font-black text-white min-h-[40px]";
+      // 文字数が多い場合はフォントサイズを少し下げる
+      centerTxt.className = `font-black text-white min-h-[40px] ${text.length > 20 ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'}`;
       centerTxt.innerText = '';
       
       State.battle.intervalId = setInterval(() => {
